@@ -56,11 +56,12 @@ minpost = 62827
 for event in Evenlist:
 	totalDoc += 1
 	fe = open(os.path.join(mypath,event,"event.json"),"r")
-	
-	EventJson = json.load(fe)
-	Label = EventJson["label"]
+	EventJson = json.load(fe)     #load from file 输出为dic格式
+	Label = EventJson["label"]    
 	TweetList = []
 	TidList = listdir(os.path.join(mypath,event))
+	#将多个路径组合后返回 
+	#os.listdir() 方法用于返回指定的文件夹包含的文件或文件夹的名字的列表
 	
 	if len(TidList) == 1:
 		tdlist1 += 1
