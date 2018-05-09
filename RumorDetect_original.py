@@ -21,17 +21,17 @@ from keras.optimizers import Adam,Adagrad
 
 mypath = "./data/"
 Evenlist = listdir(mypath)
-TIME_STEPS = 12
-IMPUT_SIZE = 625	
-BATCH_SIZE = 30
-BATCH_INDEX = 0
-OUTPUT_SIZE = 2
-CELL_SIZE = 175
-LR = 0.001
+TIME_STEPS = 12   #是要读取多少个时间点的数据
+IMPUT_SIZE = 625  # 每次每一行读取多少个像素	
+BATCH_SIZE = 30   #每一批训练多少张
+BATCH_INDEX = 0   # 用来生成数据
+OUTPUT_SIZE = 2   #分类结果的长度
+CELL_SIZE = 175   #网络中隐藏层要放多少个 unit
+LR = 0.001       #LR 是学习率
 
-def ContinuousInterval(intervalL):
-	maxInt = []
-	tempInt = [intervalL[0]]
+def ContinuousInterval(intervalL):#寻找最大的连续间隔
+	maxInt = []              
+	tempInt = [intervalL[0]]  
 	for q in range(1,len(intervalL)):
 		if intervalL[q]-intervalL[q-1] > 1:
 			if len(tempInt) > len(maxInt):
@@ -43,23 +43,25 @@ def ContinuousInterval(intervalL):
 		maxInt = tempInt
 	return maxInt
 
-totalData = []
-totalDataLabel = []
+totalData = []      #所有数据
+totalDataLabel = [] #所有数据标签
 counter = 0
 totalDoc = 0
 totalpost = 0
 tdlist1 = 0
-Pos = 0
-Neg = 0
+Pos = 0    #正面
+Neg = 0    #负面
 maxpost = 0
 minpost = 62827
 for event in Evenlist:
 	totalDoc += 1
 	fe = open(os.path.join(mypath,event,"event.json"),"r")
+	
 	EventJson = json.load(fe)
 	Label = EventJson["label"]
 	TweetList = []
 	TidList = listdir(os.path.join(mypath,event))
+	
 	if len(TidList) == 1:
 		tdlist1 += 1
 		continue
@@ -175,14 +177,15 @@ print("Neg : "+str(Neg))
 print("totalpost : "+str(totalpost))
 print("maxpost : "+str(maxpost))
 print("minpost : "+str(minpost))
-
+#训练集
 X_train = np.array(totalData[:int(counter/5*4)])
 # for q in X_train:
 # 	print(q)
 y_train = np.array(totalDataLabel[:int(counter/5*4)])
 # for q in y_train:
 # 	print(q)
-print(X_train.shape)
+print(X_train.shape)#元素个数
+#测试集
 X_test = np.array(totalData[int(counter/5*4):])
 y_test = np.array(totalDataLabel[int(counter/5*4):])
 print(X_test.shape)
@@ -192,10 +195,14 @@ print(X_test.shape)
 y_train = np_utils.to_categorical(y_train,num_classes = 2)
 y_test = np_utils.to_categorical(y_test,num_classes = 2)
 #print(y_train.shape)
+#用 Sequential 建立模型，就是一层一层地加上神经层
 model = Sequential()
 
 #RNN cell
+#for batch_input_shape, if using tensorflow as the backend, we have to put None for the batch_size.
+# Otherwise, model.evaluate() will get error
 model.add(SimpleRNN(CELL_SIZE,input_shape=(TIME_STEPS,IMPUT_SIZE)))
+#input_shape后面处理批量数据时，大小多大，有多少个时间点，每个时间点多少个像素
 
 #output layer
 model.add(Dense(OUTPUT_SIZE))
